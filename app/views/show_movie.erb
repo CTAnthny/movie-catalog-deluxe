@@ -16,10 +16,10 @@
       <th>Character</th>
       <th>Actor</th>
     </tr>
-    <% @actor_info.each do |char_and_actor| %>
+    <% @cast_info.each do |cast_member| %>
       <tr>
-        <td><a href=""><%= char_and_actor["characters"] %></a></td>
-        <td><a href="/actors/<%= char_and_actor["actors"] %>"><%= char_and_actor["actors"] %></a></td>
+        <td><%= cast_member["characters"] %></td>
+        <td><a href="/actors/<%= cast_member["id"] %>"><%= cast_member["actors"] %></a></td>
       </tr>
     <% end %>
   </table>

@@ -1,4 +1,4 @@
 <h1>Actors Listing</h1></br>
   <% @actors.each_with_index do |actor, index| %>
-    <h2><%= index + 1 %>. <a href="/actors/<%= actor["name"] %>"><%= actor["name"] %></a></h2>
+    <h2><%= index + 1 %>. <a href="/actors/<%= actor["id"] %>"><%= actor["name"] %></a></h2>
   <% end %>

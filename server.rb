@@ -24,7 +24,7 @@ end
 get '/actors' do
   @actors = db_connection do |conn|
     get_actors_query = %(
-      SELECT name
+      SELECT name, id
       FROM actors
       ORDER BY name ASC
     )
@@ -33,8 +33,21 @@ get '/actors' do
   erb :actors
 end
 
-get '/actors/:actor_name' do
-  @actor_name = params[:actor_name]
+get '/actors/:id' do
+  @actor_id = params[:id]
+  actor_id_a = []
+  actor_id_a << @actor_id.to_i
+  @actor_info = db_connection do |conn|
+    get_actor_info_query = %(
+      SELECT actors.name AS actor_name, movies.id AS movie_id, movies.title AS movie,
+        cast_members.character
+      FROM movies
+        JOIN cast_members ON movies.id = cast_members.movie_id
+        JOIN actors ON cast_members.actor_id = actors.id
+      WHERE actors.id = $1
+      )
+      conn.exec_params(get_actor_info_query, actor_id_a)
+    end
   erb :show_actor
 end
 
@@ -68,25 +81,24 @@ get '/movies/:id' do
     )
     @movie_info = conn.exec_params(get_movie_info_query, movie_id_a)
 
-    get_actor_info_query = %(
-      SELECT cast_members.character AS characters, actors.name AS actors
+    get_cast_info_query = %(
+      SELECT cast_members.character AS characters, actors.name AS actors, actors.id
       FROM cast_members
         JOIN actors ON cast_members.actor_id = actors.id
       WHERE cast_members.movie_id = $1
     )
-    @actor_info = conn.exec(get_actor_info_query, movie_id_a)
+    @cast_info = conn.exec_params(get_cast_info_query, movie_id_a)
   end
   erb :show_movie
 end
-
-# SELECT movies.title, movies.year, movies.synopsis, movies.rating,
-#   genres.name AS genre, studios.name AS studio,
-# FROM movies
-#   JOIN genres ON movies.genre_id = genres.id
-#   RIGHT OUTER JOIN studios ON movies.studio_id = studios.id
-# WHERE movies.id = @movie_id
 #
-# SELECT cast_members.character, actors.name
-# FROM cast_members
-#   JOIN actors ON cast_members.actor_id = actors.id
-# WHERE cast_members.movie_id = @movie_id
+# @actor_info = db_connection do |conn|
+#   get_actor_info_query = %(
+#     SELECT actors.name AS actor, movies.title, cast_members.character
+#     FROM actors
+#       JOIN cast_members ON actors.id = cast_members.actor_id
+#       JOIN movies ON cast_members.movie_id = movies.id
+#     WHERE actors.name LIKE "Tom Hanks"
+#   )
+#   conn.exec(get_actor_info_query)
+# end
